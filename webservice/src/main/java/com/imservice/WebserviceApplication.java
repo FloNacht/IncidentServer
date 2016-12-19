@@ -1,6 +1,7 @@
 package com.imservice;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -25,21 +26,27 @@ import com.model.*;
 	}
 	
 
-//	@Bean
-//	CommandLineRunner init(UserRepository userRepository,
-//			IncidentRepository incidentRepository)  {
-//		return (evt) -> Arrays.asList(
-//				"jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong".split(","))
-//				.forEach(
-//						a -> {
-//							User user = userRepository.save(new User(a,
-//									"password"));
-//							incidentRepository.save(new Incident(user,
-//									"http://bookmark.com/1/" + a,"exact Location", "A description", "image dir"));
-//							incidentRepository.save(new Incident(user,
-//									"http://bookmark.com/2/" + a, "exact Location", "A description", "image dir"));
-//						});
-//	}	
+	@Bean
+	CommandLineRunner init(UserRepository userRepository, IncidentRepository incidentRepository) {
+		return (evt) -> Arrays.asList("628123,621278,612893,589231,783242,R.Hartmann,F.Becker,231328,657912".split(","))
+				.forEach(a -> {
+					
+					if (a.matches("[0-9]+")) {
+						
+						User user = userRepository.save(new User(a, "password"));
+						
+						Random r = new Random();
+						char c = (char)(r.nextInt(26) + 'A');
+						
+						incidentRepository.save(new Incident(user, "Haus" + c, "Unter der Decke",
+								"Dreckig", "image dir"));
+						incidentRepository.save(new Incident(user, "Haus" + c, "Heizung",
+								"Kaputt", "image dir"));
+					} else {
+						userRepository.save(new User(a, "password", Role.FACULTY));
+					}
+				});
+	}
 
 //	 @Override
 //     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
