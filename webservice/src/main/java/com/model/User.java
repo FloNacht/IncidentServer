@@ -22,8 +22,11 @@ public class User {
     @GeneratedValue
     private Long id;
 
-    private String password;
+    @Column(unique = true, length = 64, columnDefinition = "varchar(64)", nullable = false)
     private String username;
+    
+    @Column(length = 32, columnDefinition = "varchar(32)", nullable = false)
+    private String password;
     
     @Column(length = 32, columnDefinition = "varchar(32) default 'STUDENT'", nullable = false)
     @Enumerated(value = EnumType.STRING)
