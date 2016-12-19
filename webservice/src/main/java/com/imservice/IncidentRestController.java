@@ -21,7 +21,7 @@ import com.model.*;
 import com.storage.*;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RequestMapping("/incident/{userId}")
@@ -55,19 +55,19 @@ public class IncidentRestController {
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, path = "/userIncidents")
-	public Collection<Incident> readIncidents(@PathVariable String userId) {
+	public List<Incident> readIncidents(@PathVariable String userId) {
 		this.validateUser(userId);
 		return this.incidentRepository.findByUserUsername(userId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/all")
-	public Collection<Incident> readAllIncidents(@PathVariable String userId) {
+	public List<Incident> readAllIncidents(@PathVariable String userId) {
 		this.validateUser(userId);
 		return this.incidentRepository.findByActiveTrue();
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, path = "/allArchieved")
-	public Collection<Incident> readAllArchievedIncidents(@PathVariable String userId) {
+	public List<Incident> readAllArchievedIncidents(@PathVariable String userId) {
 		this.validateUser(userId);
 		return this.incidentRepository.findByActiveFalse();
 	}
@@ -103,31 +103,43 @@ public class IncidentRestController {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/file/{filename}")
+	@RequestMapping(method = RequestMethod.GET, path = "/file")
 	@ResponseBody
-	public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+	public ResponseEntity<Resource> serveFile(@RequestParam String  filename) {
 		Resource file = storageService.loadAsResource(filename);
-		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"") //extracts Content-Type from path variable 'filename'
-				.body(file);
+		return ResponseEntity.ok().headers(this.creatingHttpHeaderforFileTransfer(file.getFilename())).body(file);
+				//.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"") //extracts Content-Type from path variable 'filename'
 	}
 	
 	@RequestMapping(method = RequestMethod.GET, path = "/{incidentId}/file")
 	@ResponseBody
 	public ResponseEntity<Resource> serveIncidentFile(@PathVariable Long incidentId) {
-
 		Incident incident = this.incidentRepository.findOne(incidentId);
-
 		if (incident == null) {
 			throw new StorageFileNotFoundException("Incident not found.");
 		}
-
 		Resource file = storageService.loadAsResource(incident.getImagePath());
+		return ResponseEntity.ok().headers(this.creatingHttpHeaderforFileTransfer(file.getFilename())).body(file);
+	}
 
+	@RequestMapping(method = RequestMethod.POST, path = "/file")
+	public String handleFileUpload(@PathVariable String userId, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+		this.validateUser(userId);
+		storageService.store(file);
+		redirectAttributes.addFlashAttribute("message",
+				"You successfully uploaded " + file.getOriginalFilename() + "!");
+		return file.getOriginalFilename();
+	}
+	
+	private void validateUser(String userId) {
+		this.userRepository.findByUsername(userId).orElseThrow(() -> new UserNotFoundException(userId));
+	}
+	
+	private HttpHeaders creatingHttpHeaderforFileTransfer(String filename) {
 		HttpHeaders header = new HttpHeaders();
-		header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"");
+		header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
 
-		switch (file.getFilename().substring(file.getFilename().lastIndexOf(".") + 1)) {
+		switch (filename.substring(filename.lastIndexOf(".") + 1)) {
 		case "jpg":
 			header.add(HttpHeaders.CONTENT_TYPE, "image/jpg");
 			break;
@@ -140,33 +152,7 @@ public class IncidentRestController {
 		default:
 			throw new StorageFileNotFoundException("Not an image type.");
 		}
-
-		return ResponseEntity.ok().headers(header).body(file);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, path = "/file")
-	public String handleFileUpload(@PathVariable String userId, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-		this.validateUser(userId);
-		storageService.store(file, userId);
-		redirectAttributes.addFlashAttribute("message",
-				"You successfully uploaded " + file.getOriginalFilename() + "!");
-		return userId + "_" + file.getOriginalFilename();
-	}
-	
-//	@RequestMapping(method = RequestMethod.GET, path = "/files")
-//	public String listUploadedFiles(Model model) throws IOException {
-//
-//		model.addAttribute("files", storageService.loadAll()
-//				.map(path -> MvcUriComponentsBuilder
-//						.fromMethodName(IncidentRestController.class, "serveFile", path.getFileName().toString())
-//						.build().toString())
-//				.collect(Collectors.toList()));
-//
-//		return "uploadForm";
-//	}
-	
-	private void validateUser(String userId) {
-		this.userRepository.findByUsername(userId).orElseThrow(() -> new UserNotFoundException(userId));
+		return header;
 	}
 
 	@ExceptionHandler(StorageFileNotFoundException.class)

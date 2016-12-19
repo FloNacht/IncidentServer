@@ -25,21 +25,21 @@ import com.model.*;
 	}
 	
 
-	@Bean
-	CommandLineRunner init(UserRepository userRepository,
-			IncidentRepository incidentRepository)  {
-		return (evt) -> Arrays.asList(
-				"jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong".split(","))
-				.forEach(
-						a -> {
-							User user = userRepository.save(new User(a,
-									"password"));
-							incidentRepository.save(new Incident(user,
-									"http://bookmark.com/1/" + a,"exact Location", "A description", "image dir"));
-							incidentRepository.save(new Incident(user,
-									"http://bookmark.com/2/" + a, "exact Location", "A description", "image dir"));
-						});
-	}	
+//	@Bean
+//	CommandLineRunner init(UserRepository userRepository,
+//			IncidentRepository incidentRepository)  {
+//		return (evt) -> Arrays.asList(
+//				"jhoeller,dsyer,pwebb,ogierke,rwinch,mfisher,mpollack,jlong".split(","))
+//				.forEach(
+//						a -> {
+//							User user = userRepository.save(new User(a,
+//									"password"));
+//							incidentRepository.save(new Incident(user,
+//									"http://bookmark.com/1/" + a,"exact Location", "A description", "image dir"));
+//							incidentRepository.save(new Incident(user,
+//									"http://bookmark.com/2/" + a, "exact Location", "A description", "image dir"));
+//						});
+//	}	
 
 //	 @Override
 //     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
