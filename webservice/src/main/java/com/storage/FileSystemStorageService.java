@@ -15,6 +15,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
+/**
+ * <h1>Spring Service for File Storing</h1> 
+ * This class implements all in the StorageService Interface defined methods for successfully up- & downloading files.
+ * 
+ * @author Florian Nachtigall
+ * @version 1.0
+ * @since 2016-12-20
+ */
 @Service
 public class FileSystemStorageService implements StorageService {
 

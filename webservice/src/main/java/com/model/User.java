@@ -11,7 +11,14 @@ import javax.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Set;
 
-
+/**
+ * <h1>JPA Entity</h1> 
+ * This JPA class defines all information of the "user" table in the database.
+ * 
+ * @author Florian Nachtigall
+ * @version 1.0
+ * @since 2016-12-20
+ */
 @Entity
 public class User {
 
