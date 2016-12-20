@@ -32,7 +32,7 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    User() { // jpa only
+    public User() { // jpa only
     }
     
     public User(String name, String password) {

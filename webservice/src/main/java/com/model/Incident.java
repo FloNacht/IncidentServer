@@ -34,7 +34,7 @@ public class Incident {
     @CreationTimestamp
     private Timestamp timestamp;
 
-    Incident() { // jpa only
+    public Incident() { // jpa only
     }
 
     public Incident(User user, String location, String exactLocation, String description, String imagePath) {
