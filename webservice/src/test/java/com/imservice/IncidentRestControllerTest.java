@@ -78,9 +78,9 @@ public class IncidentRestControllerTest {
 		
 		this.user = userRepository.save(new User(userName, "password"));
 				
-		this.incidentList.add(incidentRepository.save(new Incident(user, "A location", "An exact location", "A description", "image dir")));
-		this.incidentList.add(incidentRepository.save(new Incident(user, "A location 2", "An exact location 2", "A description 2", "image dir 2")));
-		this.incidentList.add(incidentRepository.save(new Incident(user, "A location 3", "An exact location 3", "A description 3", "image dir 3")));
+		this.incidentList.add(incidentRepository.save(new Incident(user, "A titel", "A location", "An exact location", "A description", "image dir")));
+		this.incidentList.add(incidentRepository.save(new Incident(user, "A titel 2", "A location 2", "An exact location 2", "A description 2", "image dir 2")));
+		this.incidentList.add(incidentRepository.save(new Incident(user, "A titel 3", "A location 3", "An exact location 3", "A description 3", "image dir 3")));
 
 	}
 
@@ -95,6 +95,7 @@ public class IncidentRestControllerTest {
 		mockMvc.perform(get("/incident/" + userName + "/" + this.incidentList.get(0).getId()))
 				.andExpect(status().isOk()).andExpect(content().contentType(contentType))
 				.andExpect(jsonPath("$.id", is(this.incidentList.get(0).getId().intValue())))
+				.andExpect(jsonPath("$.titel", is("A titel")))
 				.andExpect(jsonPath("$.location", is("A location")))
 				.andExpect(jsonPath("$.exactLocation", is("An exact location")))
 				.andExpect(jsonPath("$.description", is("A description")))
@@ -108,18 +109,21 @@ public class IncidentRestControllerTest {
 		mockMvc.perform(get("/incident/" + userName + "/all")).andExpect(status().isOk())
 				.andExpect(content().contentType(contentType)).andExpect(jsonPath("$", hasSize(3)))
 				.andExpect(jsonPath("$[0].id", is(this.incidentList.get(0).getId().intValue())))
+				.andExpect(jsonPath("$[0].titel", is("A titel")))
 				.andExpect(jsonPath("$[0].location", is("A location")))
 				.andExpect(jsonPath("$[0].exactLocation", is("An exact location")))
 				.andExpect(jsonPath("$[0].description", is("A description")))
 				.andExpect(jsonPath("$[0].imagePath", is("image dir")))
 				.andExpect(jsonPath("$[0].actice", is(true)))
 				.andExpect(jsonPath("$[1].id", is(this.incidentList.get(1).getId().intValue())))
+				.andExpect(jsonPath("$[1].titel", is("A titel 2")))
 				.andExpect(jsonPath("$[1].location", is("A location 2")))
 				.andExpect(jsonPath("$[1].exactLocation", is("An exact location 2")))
 				.andExpect(jsonPath("$[1].description", is("A description 2")))
 				.andExpect(jsonPath("$[1].imagePath", is("image dir 2")))
 				.andExpect(jsonPath("$[1].actice", is(true)))
 				.andExpect(jsonPath("$[2].id", is(this.incidentList.get(2).getId().intValue())))
+				.andExpect(jsonPath("$[2].titel", is("A titel 3")))
 				.andExpect(jsonPath("$[2].location", is("A location 3")))
 				.andExpect(jsonPath("$[2].exactLocation", is("An exact location 3")))
 				.andExpect(jsonPath("$[2].description", is("A description 3")))
@@ -129,7 +133,7 @@ public class IncidentRestControllerTest {
 
 	@Test
 	public void createIncident() throws Exception {
-		String incidentJson = json(new Incident(user, "A location 4", "An exact location 4", "A description 4", "image dir 4"));
+		String incidentJson = json(new Incident(user, "A titel 4", "A location 4", "An exact location 4", "A description 4", "image dir 4"));
 
 		this.mockMvc.perform(post("/incident/" + userName).contentType(contentType).content(incidentJson))
 				.andExpect(status().isCreated());
@@ -150,6 +154,7 @@ public class IncidentRestControllerTest {
 		this.mockMvc.perform(get("/incident/" + userName + "/" + this.incidentList.get(2).getId()))
 		.andExpect(status().isOk()).andExpect(content().contentType(contentType))
 		.andExpect(jsonPath("$.id", is(this.incidentList.get(2).getId().intValue())))
+		.andExpect(jsonPath("$.titel", is("A titel 3")))
 		.andExpect(jsonPath("$.location", is("A location 3")))
 		.andExpect(jsonPath("$.exactLocation", is("An exact location 3")))
 		.andExpect(jsonPath("$.description", is("A description 3")))
@@ -166,12 +171,14 @@ public class IncidentRestControllerTest {
 		this.mockMvc.perform(get("/incident/" + userName + "/allArchieved")).andExpect(status().isOk())
 		.andExpect(content().contentType(contentType)).andExpect(jsonPath("$", hasSize(2)))
 		.andExpect(jsonPath("$[0].id", is(this.incidentList.get(0).getId().intValue())))
+		.andExpect(jsonPath("$[0].titel", is("A titel")))
 		.andExpect(jsonPath("$[0].location", is("A location")))
 		.andExpect(jsonPath("$[0].exactLocation", is("An exact location")))
 		.andExpect(jsonPath("$[0].description", is("A description")))
 		.andExpect(jsonPath("$[0].imagePath", is("image dir")))
 		.andExpect(jsonPath("$[0].actice", is(false)))
 		.andExpect(jsonPath("$[1].id", is(this.incidentList.get(2).getId().intValue())))
+		.andExpect(jsonPath("$[1].titel", is("A titel 3")))
 		.andExpect(jsonPath("$[1].location", is("A location 3")))
 		.andExpect(jsonPath("$[1].exactLocation", is("An exact location 3")))
 		.andExpect(jsonPath("$[1].description", is("A description 3")))

@@ -22,6 +22,9 @@ public class Incident {
     @Id
     @GeneratedValue
     private Long id;
+    
+    @Column(nullable = false)
+    private String titel;
     private String location;
     private String exactLocation;
     private String description;
@@ -37,8 +40,9 @@ public class Incident {
     public Incident() { // jpa only
     }
 
-    public Incident(User user, String location, String exactLocation, String description, String imagePath) {
+    public Incident(User user, String titel, String location, String exactLocation, String description, String imagePath) {
         this.user = user;
+        this.titel = titel;
     	this.location = location;
     	this.exactLocation = exactLocation;
         this.description = description;
@@ -53,6 +57,10 @@ public class Incident {
     public Long getId() {
         return id;
     }
+    
+	public String getTitel() {
+		return titel;
+	}
     
     public Timestamp getTimestamp() {
     	return timestamp;

@@ -38,10 +38,10 @@ import com.model.*;
 						Random r = new Random();
 						char c = (char)(r.nextInt(26) + 'A');
 						
-						incidentRepository.save(new Incident(user, "Haus" + c, "Unter der Decke",
-								"Dreckig", "image dir"));
-						incidentRepository.save(new Incident(user, "Haus" + c, "Heizung",
-								"Kaputt", "image dir"));
+						incidentRepository.save(new Incident(user, "Dreckig","Haus " + c, "Unter der Decke",
+								"Hier ist was dreckig", "image dir"));
+						incidentRepository.save(new Incident(user, "Kaputt", "Haus " + c, "Heizung",
+								"Hier ist was kaputt", "image dir"));
 					} else {
 						userRepository.save(new User(a, "password", Role.FACULTY));
 					}
