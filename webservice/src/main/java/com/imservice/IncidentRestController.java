@@ -76,8 +76,8 @@ public class IncidentRestController {
 		this.validateUser(userId);
 
 		return this.userRepository.findByUsername(userId).map(user -> {
-			Incident result = incidentRepository.save(new Incident(user, input.getTitel(), input.getLocation(), input.getDescription(),
-					input.getExactLocation(), input.getImagePath()));
+			Incident result = incidentRepository.save(new Incident(user, input.getTitel(), input.getLocation(), input.getExactLocation(),
+					input.getDescription(), input.getImagePath()));
 
 			URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId())
 					.toUri();
