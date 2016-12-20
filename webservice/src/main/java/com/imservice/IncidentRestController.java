@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.model.*;
@@ -27,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequestMapping("/incident/{userId}")
 @RestController
 public class IncidentRestController {
-	
+
 	private final IncidentRepository incidentRepository;
 	private final UserRepository userRepository;
 	private final StorageService storageService;
@@ -53,7 +52,7 @@ public class IncidentRestController {
 		this.validateUser(userId);
 		return this.incidentRepository.findOne(incidentId);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, path = "/userIncidents")
 	public List<Incident> readIncidents(@PathVariable String userId) {
 		this.validateUser(userId);
@@ -65,7 +64,7 @@ public class IncidentRestController {
 		this.validateUser(userId);
 		return this.incidentRepository.findByActiveTrue();
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, path = "/allArchieved")
 	public List<Incident> readAllArchievedIncidents(@PathVariable String userId) {
 		this.validateUser(userId);
@@ -77,7 +76,8 @@ public class IncidentRestController {
 		this.validateUser(userId);
 
 		return this.userRepository.findByUsername(userId).map(user -> {
-			Incident result = incidentRepository.save(new Incident(user, input.getLocation(), input.getDescription(), input.getExactLocation(), input.getImagePath()));
+			Incident result = incidentRepository.save(new Incident(user, input.getLocation(), input.getDescription(),
+					input.getExactLocation(), input.getImagePath()));
 
 			URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId())
 					.toUri();
@@ -86,7 +86,7 @@ public class IncidentRestController {
 		}).orElse(ResponseEntity.noContent().build());
 
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, path = "/archieve/{incidentId}")
 	public ResponseEntity<?> archieve(@PathVariable String userId, @PathVariable Long incidentId) {
 		this.validateUser(userId);
@@ -94,7 +94,7 @@ public class IncidentRestController {
 		incidentRepository.flush();
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, path = "/reactivate/{incidentId}")
 	public ResponseEntity<?> reactivate(@PathVariable String userId, @PathVariable Long incidentId) {
 		this.validateUser(userId);
@@ -105,12 +105,11 @@ public class IncidentRestController {
 
 	@RequestMapping(method = RequestMethod.GET, path = "/file")
 	@ResponseBody
-	public ResponseEntity<Resource> serveFile(@RequestParam String  filename) {
+	public ResponseEntity<Resource> serveFile(@RequestParam String filename) {
 		Resource file = storageService.loadAsResource(filename);
 		return ResponseEntity.ok().headers(this.creatingHttpHeaderforFileTransfer(file.getFilename())).body(file);
-				//.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"") //extracts Content-Type from path variable 'filename'
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, path = "/{incidentId}/file")
 	@ResponseBody
 	public ResponseEntity<Resource> serveIncidentFile(@PathVariable Long incidentId) {
@@ -123,18 +122,17 @@ public class IncidentRestController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, path = "/file")
-	public String handleFileUpload(@PathVariable String userId, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+	public ResponseEntity<?> handleFileUpload(@PathVariable String userId, @RequestParam("file") MultipartFile file) {
 		this.validateUser(userId);
 		storageService.store(file);
-		redirectAttributes.addFlashAttribute("message",
-				"You successfully uploaded " + file.getOriginalFilename() + "!");
-		return file.getOriginalFilename();
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().queryParam("filename", file.getOriginalFilename()).build().toUri();
+		return ResponseEntity.created(location).build();
 	}
-	
+
 	private void validateUser(String userId) {
 		this.userRepository.findByUsername(userId).orElseThrow(() -> new UserNotFoundException(userId));
 	}
-	
+
 	private HttpHeaders creatingHttpHeaderforFileTransfer(String filename) {
 		HttpHeaders header = new HttpHeaders();
 		header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
